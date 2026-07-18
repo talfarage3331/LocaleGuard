@@ -1,0 +1,5 @@
+{
+  "greeting": "Hallo {{firstName}}",
+  "items": "{{count}} Artikel",
+  "progress": "%d erledigt"
+}

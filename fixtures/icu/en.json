@@ -1,0 +1,5 @@
+{
+  "cart": "You have {count, plural, one {# item} other {# items}} in '{'your'}' cart",
+  "unclosed": "Hello {name",
+  "extraClose": "All done}"
+}

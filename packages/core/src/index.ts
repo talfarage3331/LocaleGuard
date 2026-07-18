@@ -2,5 +2,13 @@ export type { EngineOptions, EngineResult } from './engine.js'
 export { runEngine } from './engine.js'
 export { i18nextParser } from './parsers/i18next.js'
 export { consoleReporter } from './reporters/console.js'
-export { defaultRules, pluralCompleteness, rules } from './rules/index.js'
+export {
+  byteOverflow,
+  defaultRules,
+  icuValidity,
+  missingKeys,
+  placeholderConsistency,
+  pluralCompleteness,
+  rules,
+} from './rules/index.js'
 export * from './types.js'
