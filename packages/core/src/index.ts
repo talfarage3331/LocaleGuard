@@ -1,7 +1,13 @@
 export type { EngineOptions, EngineResult } from './engine.js'
 export { runEngine } from './engine.js'
 export { i18nextParser } from './parsers/i18next.js'
-export { consoleReporter } from './reporters/console.js'
+export {
+  consoleReporter,
+  htmlReporter,
+  jsonReporter,
+  reporters,
+  sarifReporter,
+} from './reporters/index.js'
 export {
   byteOverflow,
   defaultRules,
