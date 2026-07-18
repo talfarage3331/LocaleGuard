@@ -1,0 +1,26 @@
+{
+  "name": "@localeguard/cli",
+  "version": "0.0.0",
+  "description": "The LocaleGuard CLI: run i18n catalog checks in CI.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "localeguard": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@localeguard/core": "workspace:*",
+    "commander": "^13.1.0",
+    "cosmiconfig": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0"
+  }
+}
