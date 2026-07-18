@@ -7,6 +7,12 @@
   "bin": {
     "localeguard": "./dist/index.js"
   },
+  "exports": {
+    "./run": {
+      "types": "./dist/run.d.ts",
+      "import": "./dist/run.js"
+    }
+  },
   "files": [
     "dist"
   ],

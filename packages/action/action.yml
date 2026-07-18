@@ -1,0 +1,46 @@
+name: LocaleGuard
+description: Detect silent i18n logic bugs in translation catalogs — plurals, ICU, placeholders, byte overflow, missing keys.
+author: LocaleGuard
+branding:
+  icon: globe
+  color: purple
+
+inputs:
+  path:
+    description: File or directory of translation catalogs to check.
+    required: true
+  source:
+    description: Source-of-truth locale (e.g. en). Falls back to config file if unset.
+    required: false
+  format:
+    description: Input format.
+    required: false
+    default: i18next
+  sarif-file:
+    description: Path to write the SARIF report to (upload it with github/codeql-action/upload-sarif).
+    required: false
+    default: localeguard.sarif
+  comment:
+    description: Post a findings summary as a PR comment.
+    required: false
+    default: 'true'
+  fail-on-error:
+    description: Fail the job when any error-severity finding is present.
+    required: false
+    default: 'true'
+  github-token:
+    description: Token used to post the PR comment.
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  sarif-file:
+    description: Path to the generated SARIF report.
+  error-count:
+    description: Number of error-severity findings.
+  warning-count:
+    description: Number of warning-severity findings.
+
+runs:
+  using: node20
+  main: dist/index.cjs

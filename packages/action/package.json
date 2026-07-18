@@ -1,0 +1,25 @@
+{
+  "name": "@localeguard/action",
+  "version": "0.0.0",
+  "description": "GitHub Action: run LocaleGuard i18n checks, upload SARIF, comment on PRs.",
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "dist",
+    "action.yml"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.0",
+    "@localeguard/cli": "workspace:*",
+    "@localeguard/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0"
+  }
+}
