@@ -142,8 +142,8 @@ catalogs (files) ──▶ Parser ──▶ Rule[] ──▶ Finding[] ──▶
 ```ts
 type PluralCat = 'zero' | 'one' | 'two' | 'few' | 'many' | 'other';
 
-interface Catalog { locale: string; source: string; entries: Record<string, Entry> }
-interface Entry   { key: string; value: string; plurals?: Partial<Record<PluralCat, string>> }
+interface Catalog { locale: string; source: string; file: string; entries: Record<string, Entry> }
+interface Entry   { key: string; value: string; plurals?: Partial<Record<PluralCat, string>>; line?: number; col?: number }
 
 interface Finding {
   ruleId: string;                              // e.g. 'plural-completeness'
