@@ -1,0 +1,9 @@
+{
+  "apple_one": "1 jabłko",
+  "apple_few": "{{count}} jabłka",
+  "apple_many": "{{count}} jabłek",
+  "apple_other": "{{count}} jabłka",
+  "banana_one": "1 banan",
+  "banana_many": "{{count}} bananów",
+  "banana_other": "{{count}} banana"
+}

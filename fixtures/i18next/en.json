@@ -1,0 +1,6 @@
+{
+  "apple_one": "{{count}} apple",
+  "apple_other": "{{count}} apples",
+  "banana_one": "{{count}} banana",
+  "banana_other": "{{count}} bananas"
+}

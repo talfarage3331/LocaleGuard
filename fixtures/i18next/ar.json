@@ -1,0 +1,10 @@
+{
+  "apple_zero": "لا تفاح",
+  "apple_one": "تفاحة",
+  "apple_two": "تفاحتان",
+  "apple_few": "{{count}} تفاحات",
+  "apple_many": "{{count}} تفاحة",
+  "apple_other": "{{count}} تفاحة",
+  "banana_one": "موزة",
+  "banana_other": "{{count}} موزة"
+}
