@@ -3,6 +3,17 @@
   "version": "0.0.0",
   "description": "GitHub Action: run LocaleGuard i18n checks, upload SARIF, comment on PRs.",
   "license": "MIT",
+  "author": "LocaleGuard",
+  "private": true,
+  "homepage": "https://github.com/talfarage3331/LocaleGuard#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/talfarage3331/LocaleGuard.git",
+    "directory": "packages/action"
+  },
+  "bugs": {
+    "url": "https://github.com/talfarage3331/LocaleGuard/issues"
+  },
   "type": "module",
   "files": [
     "dist",

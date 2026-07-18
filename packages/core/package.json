@@ -3,6 +3,27 @@
   "version": "0.0.0",
   "description": "The LocaleGuard engine: parsers, rules, reporters for i18n catalog checks.",
   "license": "MIT",
+  "author": "LocaleGuard",
+  "homepage": "https://github.com/talfarage3331/LocaleGuard#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/talfarage3331/LocaleGuard.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/talfarage3331/LocaleGuard/issues"
+  },
+  "keywords": [
+    "i18n",
+    "l10n",
+    "localization",
+    "internationalization",
+    "icu",
+    "plural",
+    "cldr",
+    "translation",
+    "linter"
+  ],
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",

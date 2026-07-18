@@ -1,5 +1,8 @@
 node_modules/
 dist/
+# GitHub Actions run from the committed bundle in the repo, not from npm —
+# the action's dist MUST be tracked or `owner/LocaleGuard@v1` fails to load.
+!packages/action/dist/
 *.tsbuildinfo
 .env
 .env.local

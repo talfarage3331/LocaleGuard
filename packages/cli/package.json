@@ -3,6 +3,28 @@
   "version": "0.0.0",
   "description": "The LocaleGuard CLI: run i18n catalog checks in CI.",
   "license": "MIT",
+  "author": "LocaleGuard",
+  "homepage": "https://github.com/talfarage3331/LocaleGuard#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/talfarage3331/LocaleGuard.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/talfarage3331/LocaleGuard/issues"
+  },
+  "keywords": [
+    "i18n",
+    "l10n",
+    "localization",
+    "internationalization",
+    "cli",
+    "icu",
+    "plural",
+    "translation",
+    "ci",
+    "linter"
+  ],
   "type": "module",
   "bin": {
     "localeguard": "./dist/index.js"
