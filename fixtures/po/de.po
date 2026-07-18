@@ -1,0 +1,10 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+
+# BAD: dropped the %d placeholder from the translation
+msgid "You have %d messages"
+msgstr "Sie haben neue Nachrichten"
+
+msgid "greeting"
+msgstr "Hallo"

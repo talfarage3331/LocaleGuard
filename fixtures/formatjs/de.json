@@ -1,0 +1,4 @@
+{
+  "greeting": "Hallo",
+  "inbox": "{count, plural, one {# Nachricht} other {# Nachrichten}}"
+}

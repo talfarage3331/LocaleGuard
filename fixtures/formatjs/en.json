@@ -1,0 +1,4 @@
+{
+  "greeting": { "defaultMessage": "Hello {name}", "description": "welcome line" },
+  "inbox": { "defaultMessage": "{count, plural, one {# message} other {# messages}}" }
+}

@@ -1,0 +1,10 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+
+# a simple key with a printf placeholder
+msgid "You have %d messages"
+msgstr "You have %d messages"
+
+msgid "greeting"
+msgstr "Hello"

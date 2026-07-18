@@ -1,0 +1,5 @@
+ru:
+  greeting: "Привет"
+  apple:
+    one: "%{count} яблоко"
+    other: "%{count} яблок"

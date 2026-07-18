@@ -4,31 +4,40 @@ import {
   type Config,
   defaultRules,
   type Finding,
+  formatjsParser,
   i18nextParser,
   type ParseInput,
   type Parser,
+  poParser,
   reporters,
   runEngine,
+  yamlParser,
 } from '@localeguard/core'
 
-// Format registry. One parser today; add a line when a new parser lands in core.
+// Format registry. Add a line when a new parser lands in core.
 export const parsers: Record<string, Parser> = {
   i18next: i18nextParser,
+  formatjs: formatjsParser,
+  po: poParser,
+  yaml: yamlParser,
 }
 
 // File extensions each format reads, for directory discovery.
-const extensions: Record<string, string> = {
-  i18next: '.json',
+const extensions: Record<string, string[]> = {
+  i18next: ['.json'],
+  formatjs: ['.json'],
+  po: ['.po'],
+  yaml: ['.yaml', '.yml'],
 }
 
 // Walk a file or directory into ParseInput[]. Locale = filename without extension
 // (en.json → 'en'), matching the fixture layout. Reads content here so core stays
 // filesystem-free.
 export function discoverInputs(target: string, format: string): ParseInput[] {
-  const ext = extensions[format] ?? ''
+  const exts = extensions[format] ?? []
   const files = statSync(target).isDirectory()
     ? readdirSync(target)
-        .filter((f) => f.endsWith(ext))
+        .filter((f) => exts.some((e) => f.endsWith(e)))
         .map((f) => join(target, f))
     : [target]
 

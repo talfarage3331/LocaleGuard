@@ -1,6 +1,9 @@
 export type { EngineOptions, EngineResult } from './engine.js'
 export { runEngine } from './engine.js'
+export { formatjsParser } from './parsers/formatjs.js'
 export { i18nextParser } from './parsers/i18next.js'
+export { poParser } from './parsers/po.js'
+export { yamlParser } from './parsers/yaml.js'
 export {
   consoleReporter,
   htmlReporter,
