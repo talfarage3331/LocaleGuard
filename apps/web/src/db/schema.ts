@@ -3,6 +3,7 @@ import { relations } from 'drizzle-orm'
 import { index, integer, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 // Only GitHub identity — no passwords, no PII beyond what GitHub OAuth returns.
+// Billing columns hold Stripe *references* only — never card data (Stripe hosts checkout).
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
   githubId: text('github_id').notNull().unique(),
@@ -10,6 +11,10 @@ export const users = pgTable('users', {
   name: text('name'),
   email: text('email'),
   avatarUrl: text('avatar_url'),
+  plan: text('plan').notNull().default('free'), // 'free' | 'pro' | 'team'
+  subscriptionStatus: text('subscription_status'), // Stripe status, null when never subscribed
+  stripeCustomerId: text('stripe_customer_id').unique(),
+  stripeSubscriptionId: text('stripe_subscription_id'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
@@ -21,6 +26,8 @@ export const repositories = pgTable('repositories', {
   githubRepoId: text('github_repo_id').notNull().unique(),
   fullName: text('full_name').notNull(), // "org/repo"
   defaultBranch: text('default_branch').notNull().default('main'),
+  // SHA-256 of the per-repo CI ingestion key. Rotate by overwriting; scoped to this repo only.
+  apiKeyHash: text('api_key_hash').unique(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 

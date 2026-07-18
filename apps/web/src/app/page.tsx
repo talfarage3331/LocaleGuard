@@ -39,13 +39,18 @@ export default async function Home() {
         <span className="font-mono text-sm font-semibold tracking-tight">
           locale<span className="text-brand">guard</span>
         </span>
-        {session ? (
-          <Link href="/dashboard" className="text-sm text-muted transition hover:text-text">
-            Dashboard →
+        <nav className="flex items-center gap-5">
+          <Link href="/pricing" className="text-sm text-muted transition hover:text-text">
+            Pricing
           </Link>
-        ) : (
-          <SignInButton />
-        )}
+          {session ? (
+            <Link href="/dashboard" className="text-sm text-muted transition hover:text-text">
+              Dashboard →
+            </Link>
+          ) : (
+            <SignInButton />
+          )}
+        </nav>
       </header>
 
       <section className="py-20">
