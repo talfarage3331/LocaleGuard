@@ -1,0 +1,46 @@
+name: Deploy web (Cloudflare Workers)
+
+# Deploys apps/web to Cloudflare Workers via OpenNext. Runs on Linux, where the
+# Next.js standalone step can create the symlinks Windows blocks locally.
+# Replaces the Cloudflare Pages/next-on-pages build, which can't run this app
+# (it forces edge runtime; the app uses node:crypto + postgres + Hyperdrive).
+#
+# Requires two repo secrets:
+#   CLOUDFLARE_API_TOKEN  — token with "Edit Cloudflare Workers" permission
+#   CLOUDFLARE_ACCOUNT_ID — 0bc8a25e796ce9a0b3f639d154d4989b
+# Runtime secrets (AUTH_SECRET, GITHUB_OAUTH_*, STRIPE_*, DATABASE_URL) are set
+# on the Worker separately (dashboard or `wrangler secret put`), not here.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/**"
+      - "packages/core/**"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/deploy-web.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-web
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build and deploy (OpenNext → Workers)
+        run: pnpm cf:deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
