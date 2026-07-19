@@ -1,6 +1,16 @@
 import type { Finding } from '@localeguard/core'
 import { relations } from 'drizzle-orm'
-import { index, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import {
+  boolean,
+  index,
+  integer,
+  jsonb,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core'
 
 export const planEnum = pgEnum('plan', ['free', 'pro', 'team', 'enterprise'])
 
@@ -29,6 +39,9 @@ export const repositories = pgTable('repositories', {
     .references(() => users.id, { onDelete: 'cascade' }),
   githubRepoId: text('github_repo_id').notNull().unique(),
   fullName: text('full_name').notNull(), // "org/repo"
+  // Only private repos count against the plan cap; public repos are unlimited on every tier.
+  // Defaults false (non-gating); onboarding sets true from the GitHub repo visibility.
+  isPrivate: boolean('is_private').notNull().default(false),
   defaultBranch: text('default_branch').notNull().default('main'),
   // SHA-256 of the per-repo CI ingestion key. Rotate by overwriting; scoped to this repo only.
   apiKeyHash: text('api_key_hash').unique(),

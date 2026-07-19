@@ -1,8 +1,8 @@
 import type { Finding } from '@localeguard/core'
-import { eq } from 'drizzle-orm'
+import { and, count, eq, lte } from 'drizzle-orm'
 import { type NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
-import { repositories, scanHistory } from '@/db/schema'
+import { repositories, scanHistory, users } from '@/db/schema'
 import { hashApiKey } from '@/lib/api-key'
 
 export const runtime = 'nodejs'
@@ -78,14 +78,50 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid findings' }, { status: 400 })
   }
 
-  // Resolve the repo from the hashed key — constant lookup, plaintext never stored.
+  // Resolve the repo (+ owner plan) from the hashed key — constant lookup, plaintext never stored.
   const [repo] = await db
-    .select({ id: repositories.id })
+    .select({
+      id: repositories.id,
+      ownerId: repositories.ownerId,
+      isPrivate: repositories.isPrivate,
+      createdAt: repositories.createdAt,
+      allowedRepos: users.allowedRepos,
+    })
     .from(repositories)
+    .innerJoin(users, eq(repositories.ownerId, users.id))
     .where(eq(repositories.apiKeyHash, hashApiKey(key)))
     .limit(1)
   if (!repo) {
     return NextResponse.json({ error: 'Invalid API key' }, { status: 401 })
+  }
+
+  // Plan gate: private repos count against the cap (null = unlimited). Public repos never do.
+  // Rank this repo among the owner's private repos by connect time; the earliest N are allowed.
+  // ponytail: createdAt ties (same-ms connects) could miscount — vanishingly rare, ignore until it bites.
+  if (repo.isPrivate && repo.allowedRepos != null) {
+    const [row] = await db
+      .select({ rank: count() })
+      .from(repositories)
+      .where(
+        and(
+          eq(repositories.ownerId, repo.ownerId),
+          eq(repositories.isPrivate, true),
+          lte(repositories.createdAt, repo.createdAt),
+        ),
+      )
+    if ((row?.rank ?? 0) > repo.allowedRepos) {
+      return NextResponse.json(
+        {
+          error: 'Private repository limit reached',
+          message:
+            `Your plan includes ${repo.allowedRepos} private ` +
+            `${repo.allowedRepos === 1 ? 'repository' : 'repositories'}, and this scan is for one beyond that limit. ` +
+            'Upgrade to Pro ($29/mo) to connect up to 5 private repositories.',
+          upgradeUrl: '/pricing',
+        },
+        { status: 403 },
+      )
+    }
   }
 
   const errorCount = findings.filter((f) => f.severity === 'error').length
