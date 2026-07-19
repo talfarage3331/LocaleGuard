@@ -14,6 +14,8 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "cli": "node packages/cli/dist/index.js",
+    "cf:build": "pnpm --filter @localeguard/web cf:build",
+    "cf:deploy": "pnpm --filter @localeguard/web deploy",
     "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
     "changeset": "changeset",
     "version-packages": "changeset version",
