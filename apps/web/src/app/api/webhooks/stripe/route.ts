@@ -2,10 +2,18 @@ import { eq } from 'drizzle-orm'
 import { type NextRequest, NextResponse } from 'next/server'
 import type Stripe from 'stripe'
 import { db } from '@/db'
-import { users } from '@/db/schema'
+import { planEnum, users } from '@/db/schema'
 import { stripe } from '@/lib/stripe'
 
 export const runtime = 'nodejs'
+
+// Paid tiers only — a webhook must never silently set an unknown plan.
+const PAID_PLANS = planEnum.enumValues.filter((p) => p !== 'free')
+function toPaidPlan(value: string | undefined): (typeof PAID_PLANS)[number] {
+  return (PAID_PLANS as readonly string[]).includes(value ?? '')
+    ? (value as (typeof PAID_PLANS)[number])
+    : 'pro'
+}
 
 // Verify every webhook signature before trusting a single byte of the body.
 export async function POST(req: NextRequest) {
@@ -33,7 +41,7 @@ export async function POST(req: NextRequest) {
           .set({
             stripeCustomerId: String(s.customer),
             stripeSubscriptionId: s.subscription ? String(s.subscription) : null,
-            plan: s.metadata?.plan ?? 'pro',
+            plan: toPaidPlan(s.metadata?.plan),
             subscriptionStatus: 'active',
           })
           .where(eq(users.id, userId))

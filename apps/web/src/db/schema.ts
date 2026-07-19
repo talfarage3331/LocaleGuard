@@ -1,6 +1,8 @@
 import type { Finding } from '@localeguard/core'
 import { relations } from 'drizzle-orm'
-import { index, integer, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { index, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+
+export const planEnum = pgEnum('plan', ['free', 'pro', 'team', 'enterprise'])
 
 // Only GitHub identity — no passwords, no PII beyond what GitHub OAuth returns.
 // Billing columns hold Stripe *references* only — never card data (Stripe hosts checkout).
@@ -11,7 +13,9 @@ export const users = pgTable('users', {
   name: text('name'),
   email: text('email'),
   avatarUrl: text('avatar_url'),
-  plan: text('plan').notNull().default('free'), // 'free' | 'pro' | 'team'
+  plan: planEnum('plan').notNull().default('free'),
+  // Hard cap on connected private repos. null = unlimited (team/enterprise). Free = 1, Pro = 5.
+  allowedRepos: integer('allowed_repos').default(1),
   subscriptionStatus: text('subscription_status'), // Stripe status, null when never subscribed
   stripeCustomerId: text('stripe_customer_id').unique(),
   stripeSubscriptionId: text('stripe_subscription_id'),
