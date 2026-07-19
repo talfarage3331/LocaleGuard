@@ -66,7 +66,8 @@ export function FeatureCarousel() {
     return () => clearInterval(t)
   }, [])
 
-  const s = SLIDES[i] ?? SLIDES[0]!
+  const s = SLIDES[i] ?? SLIDES[0]
+  if (!s) return null
 
   return (
     <div className="rounded-3xl border border-border glass p-6 sm:p-10">

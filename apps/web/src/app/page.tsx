@@ -79,7 +79,10 @@ export default async function Home() {
 
             <dl className="mt-10 flex flex-wrap gap-x-8 gap-y-4 border-t border-border pt-6">
               {[
-                { stat: '$1,000–1,700/mo', label: 'engineering hours saved vs. tracing keys by hand' },
+                {
+                  stat: '$1,000–1,700/mo',
+                  label: 'engineering hours saved vs. tracing keys by hand',
+                },
                 { stat: '5 checks', label: 'silent i18n logic bugs, blocked before merge' },
                 { stat: '10 locales', label: 'CLDR plural rules enforced, ru · pl · ar · ja' },
               ].map((m) => (
