@@ -101,10 +101,50 @@ body {
   animation: rise 0.4s ease-out both;
 }
 
+/* Scan simulator — a brand-tinted line sweeping down the mock preview while a
+   check runs, plus a determinate progress fill. transform/opacity only. */
+@keyframes scan-sweep {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(256px);
+    opacity: 0;
+  }
+}
+
+.animate-scan {
+  animation: scan-sweep 1.5s ease-in-out infinite;
+}
+
+@keyframes scan-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* origin-left in markup; base (no animation) is scaleX(1) so reduced-motion
+   shows a completed bar rather than an empty one. */
+.animate-progress {
+  animation: scan-progress 1.5s ease-out forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .aurora,
   .animate-badge,
-  .animate-rise {
+  .animate-rise,
+  .animate-scan,
+  .animate-progress {
     animation: none;
   }
 }

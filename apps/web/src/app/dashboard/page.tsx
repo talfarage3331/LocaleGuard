@@ -2,6 +2,7 @@ import { desc, eq, inArray } from 'drizzle-orm'
 import Link from 'next/link'
 import { auth } from '@/auth'
 import { SignInButton, SignOutButton } from '@/components/auth-buttons'
+import { ScanSimulator } from '@/components/dashboard/scan-simulator-dynamic'
 import { db } from '@/db'
 import { repositories, scanHistory } from '@/db/schema'
 
@@ -118,6 +119,10 @@ export default async function Dashboard({
           <SignOutButton />
         </div>
       </header>
+
+      <section className="pt-10">
+        <ScanSimulator />
+      </section>
 
       <section className="py-10">
         <div className="flex items-end justify-between">
