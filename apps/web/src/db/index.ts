@@ -11,7 +11,9 @@ function getDb(): PostgresJsDatabase<typeof schema> {
   if (_db) return _db
   const connectionString = process.env.DATABASE_URL
   if (!connectionString) throw new Error('DATABASE_URL is not set')
-  const client = globalForDb.client ?? postgres(connectionString)
+  // prepare:false is required for Supabase's transaction pooler (pgBouncer, port 6543);
+  // harmless on the session pooler / direct connection.
+  const client = globalForDb.client ?? postgres(connectionString, { prepare: false })
   if (process.env.NODE_ENV !== 'production') globalForDb.client = client
   _db = drizzle(client, { schema })
   return _db
