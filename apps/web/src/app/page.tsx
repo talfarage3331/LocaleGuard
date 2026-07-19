@@ -1,9 +1,25 @@
 import Link from 'next/link'
 import { auth } from '@/auth'
 import { SignInButton } from '@/components/auth-buttons'
+import { ScanSimulator } from '@/components/dashboard/scan-simulator-dynamic'
 import { FeatureCarousel } from '@/components/feature-carousel'
 import { PrComment } from '@/components/pr-comment'
 import { SiteHeader } from '@/components/site-header'
+
+const AUDIENCE = [
+  {
+    who: 'Developers',
+    body: 'You write the code and the English tests pass — but pl/ru/ar plurals fall back silently and a German string overruns a fixed badge. LocaleGuard runs in CI and fails the build before that reaches production.',
+  },
+  {
+    who: 'Product managers',
+    body: "You own the launch, not the ICU syntax. Get a plain PR comment that says exactly which locale is broken and why, so a release isn't blocked by a bug nobody can see in English.",
+  },
+  {
+    who: 'Solo founders',
+    body: 'No QA team, no localization engineer. One GitHub Action watches every locale on every PR, so shipping to ten languages costs you the same review effort as shipping to one.',
+  },
+]
 
 const CHECKS = [
   {
@@ -110,6 +126,47 @@ export default async function Home() {
             <h2 className="text-3xl font-semibold tracking-tight">From red PR to green build.</h2>
           </div>
           <FeatureCarousel />
+        </section>
+
+        {/* interactive scan simulator — client-side demo, no login needed */}
+        <section className="py-12" id="demo">
+          <div className="mb-8 text-center">
+            <p className="mb-3 font-mono text-xs uppercase tracking-widest text-brand">
+              See it catch a real bug
+            </p>
+            <h2 className="text-3xl font-semibold tracking-tight">
+              Watch a byte-overflow break in front of you.
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-muted">
+              A real German promo string that fits in English but spills past a fixed-width badge in
+              de-DE. Run the scan, then apply the fix — no sign-in required.
+            </p>
+          </div>
+          <div className="mx-auto max-w-2xl">
+            <ScanSimulator />
+          </div>
+        </section>
+
+        {/* who it's for */}
+        <section className="py-16">
+          <div className="mb-8 text-center">
+            <p className="mb-3 font-mono text-xs uppercase tracking-widest text-brand">
+              Who it's for
+            </p>
+            <h2 className="text-3xl font-semibold tracking-tight">
+              One check, every role that ships to more than one language.
+            </h2>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {AUDIENCE.map((a) => (
+              <div key={a.who} className="rounded-xl border border-border glass p-6">
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-brand">
+                  {a.who}
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-muted">{a.body}</p>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* checks grid */}
