@@ -13,13 +13,13 @@ const PRODUCT = [
 ]
 
 const RESOURCES = [
-  { label: 'Documentation', href: 'https://github.com/localeguard/localeguard#readme' },
+  { label: 'Documentation', href: 'https://github.com/talfarage3331/LocaleGuard#readme' },
   { label: 'CLI on npm', href: 'https://www.npmjs.com/package/@localeguard/cli' },
   {
     label: 'GitHub Action',
-    href: 'https://github.com/localeguard/localeguard/tree/main/packages/action',
+    href: 'https://github.com/talfarage3331/LocaleGuard/tree/main/packages/action',
   },
-  { label: 'Source on GitHub', href: 'https://github.com/localeguard/localeguard' },
+  { label: 'Source on GitHub', href: 'https://github.com/talfarage3331/LocaleGuard' },
 ]
 
 function Chevron() {
