@@ -32,7 +32,25 @@ function StatCard({ label, value, tone }: { label: string; value: number; tone?:
   )
 }
 
-export default async function Dashboard() {
+// Plain <a>, not next/link: /api/auth/github/install is a server redirect to github.com,
+// so it needs a full-page navigation rather than an RSC prefetch.
+function ConnectButton({ label = 'Connect GitHub' }: { label?: string }) {
+  return (
+    <a
+      href="/api/auth/github/install"
+      className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
+    >
+      {label}
+    </a>
+  )
+}
+
+export default async function Dashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>
+}) {
+  const { error } = await searchParams
   const session = await auth()
 
   if (!session?.user?.id) {
@@ -107,27 +125,61 @@ export default async function Dashboard() {
             <h1 className="text-2xl font-semibold tracking-tight">Scan history</h1>
             <p className="mt-2 text-muted">Findings uploaded by the LocaleGuard GitHub Action.</p>
           </div>
-          {session.user.plan === 'free' && (
-            <Link
-              href="/pricing"
-              className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
-            >
-              Upgrade to Pro
-            </Link>
-          )}
+          <div className="flex items-center gap-3">
+            {session.user.plan === 'free' && (
+              <Link
+                href="/pricing"
+                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text transition hover:bg-panel"
+              >
+                Upgrade to Pro
+              </Link>
+            )}
+            <ConnectButton label={repos.length === 0 ? 'Connect GitHub' : 'Connect more'} />
+          </div>
         </div>
+
+        {error === 'invalid_state' && (
+          <div className="mt-6 rounded-lg border border-err/40 bg-err/10 px-4 py-3 text-sm text-err">
+            We couldn't verify that install request. Please start the connection again from this
+            dashboard.
+          </div>
+        )}
 
         {repos.length === 0 ? (
           <div className="mt-8 rounded-xl border border-dashed border-border bg-panel p-10 text-center">
             <p className="text-muted">No repositories connected yet.</p>
             <p className="mt-1 text-sm text-muted">
-              Add the <code className="font-mono text-text">localeguard/action</code> to a workflow
-              and upload results to <code className="font-mono text-text">/api/v1/scans</code> to
-              start ingesting findings.
+              Connect the GitHub App to sync your repositories, then add the{' '}
+              <code className="font-mono text-text">localeguard/action</code> to a workflow to start
+              ingesting findings into <code className="font-mono text-text">/api/v1/scans</code>.
             </p>
+            <div className="mt-6 flex justify-center">
+              <ConnectButton />
+            </div>
           </div>
         ) : (
           <>
+            <div className="mt-8 rounded-xl border border-border bg-panel p-5">
+              <p className="text-sm text-muted">Connected repositories</p>
+              <ul className="mt-4 flex flex-wrap gap-2">
+                {repos.map((r) => (
+                  <li
+                    key={r.id}
+                    className="flex items-center gap-2 rounded-lg border border-border bg-canvas px-3 py-1.5 text-sm"
+                  >
+                    <span className="font-mono text-text">{r.fullName}</span>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide ${
+                        r.isPrivate ? 'bg-warn/15 text-warn' : 'bg-ok/15 text-ok'
+                      }`}
+                    >
+                      {r.isPrivate ? 'Private' : 'Public'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
             <div className="mt-8 grid gap-4 sm:grid-cols-4">
               <StatCard label="Repositories" value={repos.length} />
               <StatCard label="Passing" value={passing} tone="text-ok" />
