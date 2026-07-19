@@ -76,6 +76,21 @@ export default async function Home() {
                 npx @localeguard/cli check ./locales
               </code>
             </div>
+
+            <dl className="mt-10 flex flex-wrap gap-x-8 gap-y-4 border-t border-border pt-6">
+              {[
+                { stat: '$1,000–1,700/mo', label: 'engineering hours saved vs. tracing keys by hand' },
+                { stat: '5 checks', label: 'silent i18n logic bugs, blocked before merge' },
+                { stat: '10 locales', label: 'CLDR plural rules enforced, ru · pl · ar · ja' },
+              ].map((m) => (
+                <div key={m.label} className="max-w-[13rem]">
+                  <dt className="bg-gradient-to-r from-white to-white/70 bg-clip-text font-mono text-lg font-semibold tracking-tight text-transparent">
+                    {m.stat}
+                  </dt>
+                  <dd className="mt-1 text-xs leading-snug text-muted">{m.label}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
 
           <div className="relative">
