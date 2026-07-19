@@ -25,3 +25,75 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
+
+/* Frosted-glass surface used by the header and pricing columns. */
+.glass {
+  background: color-mix(in srgb, var(--color-panel) 55%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Aurora mesh — layered radial blobs (electric cyan / tech purple / magenta)
+   that drift slowly behind the hero and pricing. Pure CSS, no libs. */
+.aurora {
+  position: absolute;
+  inset: -25% -10% auto -10%;
+  height: 140%;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(70px);
+  opacity: 0.6;
+  background:
+    radial-gradient(38% 44% at 18% 22%, rgba(34, 211, 238, 0.38), transparent 70%),
+    radial-gradient(34% 42% at 80% 14%, rgba(139, 92, 246, 0.42), transparent 70%),
+    radial-gradient(42% 48% at 60% 78%, rgba(236, 72, 153, 0.32), transparent 70%);
+  animation: aurora-drift 18s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-drift {
+  from {
+    transform: translate3d(-2%, -1%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(3%, 2%, 0) scale(1.12);
+  }
+}
+
+@keyframes badge-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.45);
+  }
+  50% {
+    opacity: 0.85;
+    box-shadow: 0 0 0 6px rgba(99, 102, 241, 0);
+  }
+}
+
+.animate-badge {
+  animation: badge-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-rise {
+  animation: rise 0.4s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora,
+  .animate-badge,
+  .animate-rise {
+    animation: none;
+  }
+}

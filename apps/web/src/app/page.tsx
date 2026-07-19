@@ -1,6 +1,9 @@
 import Link from 'next/link'
 import { auth } from '@/auth'
 import { SignInButton } from '@/components/auth-buttons'
+import { FeatureCarousel } from '@/components/feature-carousel'
+import { ProductSim } from '@/components/product-sim'
+import { SiteHeader } from '@/components/site-header'
 
 const CHECKS = [
   {
@@ -34,61 +37,72 @@ export default async function Home() {
   const session = await auth()
 
   return (
-    <main className="mx-auto max-w-5xl px-6">
-      <header className="flex items-center justify-between py-6">
-        <span className="font-mono text-sm font-semibold tracking-tight">
-          locale<span className="text-brand">guard</span>
-        </span>
-        <nav className="flex items-center gap-5">
-          <Link href="/pricing" className="text-sm text-muted transition hover:text-text">
-            Pricing
-          </Link>
-          {session ? (
-            <Link href="/dashboard" className="text-sm text-muted transition hover:text-text">
-              Dashboard →
-            </Link>
-          ) : (
-            <SignInButton />
-          )}
-        </nav>
-      </header>
+    <>
+      <SiteHeader />
 
-      <section className="py-20">
-        <p className="mb-4 font-mono text-xs uppercase tracking-widest text-brand">
-          CI-first i18n linting
-        </p>
-        <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
-          Catch the localization bugs that pass English tests and break in production.
-        </h1>
-        <p className="mt-6 max-w-2xl text-lg text-muted">
-          LocaleGuard reads your translation catalogs and fails the build on plural gaps, broken ICU
-          messages, placeholder drift, and byte overflow — the silent logic bugs no TMS checks.
-        </p>
-        <div className="mt-8 flex items-center gap-4">
-          {session ? (
-            <Link
-              href="/dashboard"
-              className="rounded-lg bg-brand px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
-            >
-              Open dashboard
-            </Link>
-          ) : (
-            <SignInButton />
-          )}
-          <code className="rounded-lg border border-border bg-panel px-3 py-2 font-mono text-sm text-muted">
-            npx @localeguard/cli check ./locales
-          </code>
-        </div>
-      </section>
-
-      <section className="grid gap-4 pb-24 sm:grid-cols-2 lg:grid-cols-3">
-        {CHECKS.map((c) => (
-          <div key={c.id} className="rounded-xl border border-border bg-panel p-5">
-            <h2 className="font-mono text-sm font-medium text-text">{c.title}</h2>
-            <p className="mt-2 text-sm leading-relaxed text-muted">{c.body}</p>
+      <main className="mx-auto max-w-6xl px-6">
+        {/* hero */}
+        <section className="relative isolate grid items-center gap-12 py-20 lg:grid-cols-[1.05fr_1fr] lg:py-28">
+          <div className="aurora" aria-hidden="true" />
+          <div className="relative">
+            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-border glass px-3 py-1 font-mono text-xs uppercase tracking-widest text-brand">
+              <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+              CI-first i18n linting
+            </p>
+            <h1 className="max-w-2xl bg-gradient-to-br from-white to-white/60 bg-clip-text text-4xl font-semibold leading-[1.08] tracking-tight text-transparent sm:text-5xl lg:text-6xl">
+              Catch the localization bugs that pass English tests and break in production.
+            </h1>
+            <p className="mt-6 max-w-xl text-lg text-muted">
+              LocaleGuard reads your translation catalogs and fails the build on plural gaps, broken
+              ICU messages, placeholder drift, and byte overflow — the silent logic bugs no TMS
+              checks.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-4">
+              {session ? (
+                <Link
+                  href="/dashboard"
+                  className="rounded-lg bg-brand px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-brand/30 transition hover:opacity-90"
+                >
+                  Open dashboard
+                </Link>
+              ) : (
+                <SignInButton />
+              )}
+              <code className="rounded-lg border border-border glass px-3 py-2.5 font-mono text-sm text-muted">
+                npx @localeguard/cli check ./locales
+              </code>
+            </div>
           </div>
-        ))}
-      </section>
-    </main>
+
+          <div className="relative">
+            <ProductSim />
+          </div>
+        </section>
+
+        {/* feature carousel */}
+        <section className="pb-8" id="features">
+          <div className="mb-8 text-center">
+            <p className="mb-3 font-mono text-xs uppercase tracking-widest text-brand">
+              What it checks
+            </p>
+            <h2 className="text-3xl font-semibold tracking-tight">Five checks, one green build.</h2>
+          </div>
+          <FeatureCarousel />
+        </section>
+
+        {/* checks grid */}
+        <section className="grid gap-4 py-20 sm:grid-cols-2 lg:grid-cols-3">
+          {CHECKS.map((c) => (
+            <div
+              key={c.id}
+              className="rounded-xl border border-border glass p-5 transition hover:border-brand/40"
+            >
+              <h3 className="font-mono text-sm font-medium text-text">{c.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">{c.body}</p>
+            </div>
+          ))}
+        </section>
+      </main>
+    </>
   )
 }
