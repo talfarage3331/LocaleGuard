@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { auth } from '@/auth'
 import { SignInButton } from '@/components/auth-buttons'
 import { FeatureCarousel } from '@/components/feature-carousel'
-import { ProductSim } from '@/components/product-sim'
+import { PrComment } from '@/components/pr-comment'
 import { SiteHeader } from '@/components/site-header'
 
 const CHECKS = [
@@ -43,6 +43,10 @@ export default async function Home() {
       <main className="mx-auto max-w-6xl px-6">
         {/* hero */}
         <section className="relative isolate grid items-center gap-12 py-20 lg:grid-cols-[1.05fr_1fr] lg:py-28">
+          <div
+            className="grid-bg absolute inset-x-[-50vw] -top-24 bottom-0 -z-10"
+            aria-hidden="true"
+          />
           <div className="aurora" aria-hidden="true" />
           <div className="relative">
             <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-border glass px-3 py-1 font-mono text-xs uppercase tracking-widest text-brand">
@@ -50,12 +54,12 @@ export default async function Home() {
               CI-first i18n linting
             </p>
             <h1 className="max-w-2xl bg-gradient-to-br from-white to-white/60 bg-clip-text text-4xl font-semibold leading-[1.08] tracking-tight text-transparent sm:text-5xl lg:text-6xl">
-              Catch the localization bugs that pass English tests and break in production.
+              Stop shipping broken localized UIs that quietly cost you revenue.
             </h1>
             <p className="mt-6 max-w-xl text-lg text-muted">
-              LocaleGuard reads your translation catalogs and fails the build on plural gaps, broken
-              ICU messages, placeholder drift, and byte overflow — the silent logic bugs no TMS
-              checks.
+              LocaleGuard reads your translation catalogs in CI and blocks the merge on plural gaps,
+              broken ICU messages, placeholder drift, and byte overflow — the silent logic bugs no
+              TMS catches and no English test ever sees.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
               {session ? (
@@ -75,7 +79,7 @@ export default async function Home() {
           </div>
 
           <div className="relative">
-            <ProductSim />
+            <PrComment />
           </div>
         </section>
 
@@ -83,9 +87,9 @@ export default async function Home() {
         <section className="pb-8" id="features">
           <div className="mb-8 text-center">
             <p className="mb-3 font-mono text-xs uppercase tracking-widest text-brand">
-              What it checks
+              Built for the workflow
             </p>
-            <h2 className="text-3xl font-semibold tracking-tight">Five checks, one green build.</h2>
+            <h2 className="text-3xl font-semibold tracking-tight">From red PR to green build.</h2>
           </div>
           <FeatureCarousel />
         </section>

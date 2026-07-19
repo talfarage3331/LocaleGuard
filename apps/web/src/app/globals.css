@@ -33,6 +33,17 @@ body {
   -webkit-backdrop-filter: blur(14px);
 }
 
+/* Faint dark grid behind the hero. Masked to a soft top-center vignette so it
+   fades into the canvas instead of hard-edging at the section bounds. */
+.grid-bg {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(120% 80% at 50% 0%, #000 35%, transparent 78%);
+  mask-image: radial-gradient(120% 80% at 50% 0%, #000 35%, transparent 78%);
+}
+
 /* Aurora mesh — layered radial blobs (electric cyan / tech purple / magenta)
    that drift slowly behind the hero and pricing. Pure CSS, no libs. */
 .aurora {

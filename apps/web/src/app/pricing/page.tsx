@@ -14,8 +14,15 @@ export default async function Pricing() {
   const plans: PlanView[] = PLANS.map((p) => ({
     id: p.id,
     name: p.name,
-    monthly: Number(p.price.replace(/[^0-9.]/g, '')) || 0,
+    kind: p.kind,
+    tagline: p.tagline,
+    monthly: p.monthly,
+    annual: p.annual,
+    seatPrice: p.seatPrice,
+    minSeats: p.minSeats,
     features: p.features,
+    badges: p.badges,
+    contactHref: p.contactHref,
     highlight: p.highlight,
     isCurrent: p.id === currentPlan,
     buyable: Boolean(p.priceId) && p.id !== currentPlan,
@@ -25,7 +32,7 @@ export default async function Pricing() {
     <>
       <SiteHeader />
 
-      <main className="relative isolate mx-auto max-w-6xl px-6">
+      <main className="relative isolate mx-auto max-w-7xl px-6">
         <div className="aurora" aria-hidden="true" />
 
         <section className="relative py-16 text-center sm:py-20">

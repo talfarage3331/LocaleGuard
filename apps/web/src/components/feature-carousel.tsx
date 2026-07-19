@@ -12,39 +12,9 @@ interface Slide {
 
 const SLIDES: Slide[] = [
   {
-    eyebrow: 'CLDR-accurate',
-    title: 'Plural rule validation',
-    body: 'Every plural key is checked against the exact CLDR categories its target language requires — powered by the runtime’s own Intl.PluralRules, never a hand-rolled table.',
-    benefits: [
-      'one / two / few / many / zero / other per locale',
-      'Catches the silent one→other fallback in ru, pl, ar',
-      'New Node ships newer CLDR — you inherit it free',
-    ],
-    code: [
-      'ru requires: one · few · many · other',
-      'found:       one · few',
-      '✖ missing "many", "other"',
-    ],
-  },
-  {
-    eyebrow: 'Message-safe',
-    title: 'ICU parsing & placeholders',
-    body: 'Source and every translation are parsed with the FormatJS ICU parser, so broken syntax and drifting {placeholders} fail the build instead of the user’s screen.',
-    benefits: [
-      'Malformed ICU caught before it renders',
-      'Every {name}, {count}, %s survives translation',
-      'No extra placeholders sneak into a target',
-    ],
-    code: [
-      'en: "{count, plural, one {# item} other {# items}}"',
-      'de: "{count, plural, one {# Artikel}}"',
-      '✖ de: unbalanced braces · missing "other"',
-    ],
-  },
-  {
-    eyebrow: 'Format-agnostic',
-    title: 'Multi-format discovery',
-    body: 'Point it at a folder. i18next JSON, FormatJS, gettext .po and Rails / Django YAML all normalize into one catalog model — the same five checks run everywhere.',
+    eyebrow: 'Zero-dependency',
+    title: 'Multi-format linting',
+    body: 'Point it at a folder. i18next JSON, FormatJS, gettext .po and Rails / Django YAML all normalize into one catalog model — the same five checks run everywhere, no plugins to wire up.',
     benefits: [
       'i18next · FormatJS · .po · YAML',
       'One SARIF report → GitHub Code Scanning',
@@ -54,6 +24,36 @@ const SLIDES: Slide[] = [
       '$ localeguard check ./locales',
       'scanned 10 locales · 1,284 keys',
       '✓ json · po · yaml — 0 errors',
+    ],
+  },
+  {
+    eyebrow: 'Right on the PR',
+    title: 'Rich PR decorations & new-only blocking',
+    body: 'Findings land as inline review comments where the bug is. New-only mode blocks the merge on bugs your branch introduced, without drowning you in the backlog you inherited.',
+    benefits: [
+      'Inline annotations at the exact key',
+      'Fail the build on new bugs only',
+      'Legacy findings surfaced, never blocking',
+    ],
+    code: [
+      'PR #248 · locales/ru/messages.json',
+      '✖ new: plural-completeness (ru) missing "many"',
+      '· 3 pre-existing findings — reported, not blocked',
+    ],
+  },
+  {
+    eyebrow: 'For the whole team',
+    title: 'Alerts & manager dashboards',
+    body: 'Route failures to Slack or Teams the moment they land, and give engineering managers a reporting dashboard of i18n health across every repo — trends, top offenders, and time-to-green.',
+    benefits: [
+      'Slack + Teams alerts on failing scans',
+      'Org-wide i18n health dashboards',
+      'Trends, top rules, and time-to-green',
+    ],
+    code: [
+      '#eng-alerts  localeguard',
+      '✖ checkout-web failed · 2 new plural bugs (ru, pl)',
+      '✓ trend: 94% green over last 30 days',
     ],
   },
 ]

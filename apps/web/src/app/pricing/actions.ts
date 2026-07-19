@@ -16,7 +16,16 @@ export async function startCheckout(formData: FormData) {
 
   const planId = String(formData.get('plan') ?? '')
   const plan = planById(planId)
-  if (!plan?.priceId) redirect('/pricing') // free tier / unconfigured price → nothing to buy
+  if (!plan) redirect('/pricing')
+
+  // Pro can bill yearly; Team bills per seat (quantity), floored at minSeats.
+  const yearly = formData.get('cycle') === 'yearly'
+  const priceId = yearly && plan.priceIdYearly ? plan.priceIdYearly : plan.priceId
+  if (!priceId) redirect('/pricing') // free tier / unconfigured price → nothing to buy
+
+  const seats = Number(formData.get('seats'))
+  const quantity =
+    plan.kind === 'seat' ? Math.max(plan.minSeats ?? 1, Number.isFinite(seats) ? seats : 0) : 1
 
   const [user] = await db
     .select({ id: users.id, email: users.email, customerId: users.stripeCustomerId })
@@ -27,7 +36,7 @@ export async function startCheckout(formData: FormData) {
 
   const checkout = await stripe().checkout.sessions.create({
     mode: 'subscription',
-    line_items: [{ price: plan.priceId, quantity: 1 }],
+    line_items: [{ price: priceId, quantity }],
     customer: user.customerId ?? undefined,
     customer_email: user.customerId ? undefined : (user.email ?? undefined),
     metadata: { userId: user.id, plan: plan.id },
