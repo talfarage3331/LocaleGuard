@@ -1,3 +1,4 @@
+import { getCloudflareContext } from '@opennextjs/cloudflare'
 import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import * as schema from './schema'
@@ -7,9 +8,22 @@ import * as schema from './schema'
 const globalForDb = globalThis as unknown as { client?: ReturnType<typeof postgres> }
 let _db: PostgresJsDatabase<typeof schema> | null = null
 
+// On Cloudflare the Postgres connection comes from the Hyperdrive binding (pooled,
+// TCP handled at the edge); locally there's no binding, so fall back to DATABASE_URL.
+function resolveConnectionString(): string | undefined {
+  try {
+    const hyperdrive = (getCloudflareContext().env as { HYPERDRIVE?: { connectionString: string } })
+      .HYPERDRIVE
+    if (hyperdrive?.connectionString) return hyperdrive.connectionString
+  } catch {
+    // Not in a Cloudflare request context (e.g. `next dev` without a bound Hyperdrive).
+  }
+  return process.env.DATABASE_URL
+}
+
 function getDb(): PostgresJsDatabase<typeof schema> {
   if (_db) return _db
-  const connectionString = process.env.DATABASE_URL
+  const connectionString = resolveConnectionString()
   if (!connectionString) throw new Error('DATABASE_URL is not set')
   // prepare:false is required for Supabase's transaction pooler (pgBouncer, port 6543);
   // harmless on the session pooler / direct connection.
