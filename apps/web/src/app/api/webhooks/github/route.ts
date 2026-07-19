@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from 'next/server'
+import { handleWebhookEvent } from '@/lib/github-events'
 import { verifyGithubSignature } from '@/lib/github-webhook'
 
 export const runtime = 'nodejs'
 
-// Verify every webhook signature before trusting a single byte of the body.
-// Phase 3 will branch on `x-github-event` to process installation events; for now
-// verified requests (including the initial `ping`) are simply acknowledged.
+// Verify every webhook signature before trusting a single byte of the body, then
+// dispatch installation events to keep the `repositories` table synced in real time.
 export async function POST(req: NextRequest) {
   const secret = process.env.GITHUB_WEBHOOK_SECRET
   if (!secret) {
@@ -17,6 +17,17 @@ export async function POST(req: NextRequest) {
   if (!valid) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }
+
+  let payload: unknown
+  try {
+    payload = JSON.parse(body)
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+  }
+
+  // Unknown/irrelevant events (including `ping`) are safely ignored inside the handler.
+  const event = req.headers.get('x-github-event')
+  if (event) await handleWebhookEvent(event, payload)
 
   return NextResponse.json({ received: true })
 }
