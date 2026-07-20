@@ -81,10 +81,10 @@ It is **not** a TMS (Lokalise/Crowdin/Phrase manage strings) and **not** a visua
 | Typecheck | **tsc --noEmit** | |
 | Lint + format | **biome** | single tool, config in `biome.json` |
 | Versioning/publish (OSS) | **changesets** | |
-| Web app | **Next.js (App Router)** on Vercel | |
-| Database | **Postgres** (managed, e.g. Neon) + **Drizzle** ORM | |
+| Web app | **Next.js (App Router)** on **Cloudflare Workers** via **OpenNext** (`@opennextjs/cloudflare`) | NOT Vercel, NOT Cloudflare Pages — see **Deployment** below. |
+| Database | **Postgres** (Supabase) + **Drizzle** ORM, reached via a Cloudflare **Hyperdrive** binding at the edge | `db/index.ts` falls back to `DATABASE_URL` when no binding (local dev). |
 | Auth | **Auth.js** (GitHub OAuth) | no passwords stored |
-| Billing | **Merchant-of-Record** (Paddle / LemonSqueezy / Polar) via webhook | no card handling |
+| Billing | **Stripe** (overrides the earlier Merchant-of-Record plan) | verify `STRIPE_WEBHOOK_SECRET` on every webhook. |
 | Styling | **Tailwind** | |
 
 ---
@@ -114,6 +114,35 @@ pnpm cli -- check ./fixtures/i18next --source en --format i18next
 pnpm dev:web                      # next dev in apps/web
 pnpm --filter @localeguard/web db:generate   # Drizzle migration from schema
 pnpm --filter @localeguard/web db:migrate    # apply migrations
+```
+
+### Deployment — `apps/web` → Cloudflare Workers (OpenNext)
+
+`apps/web` deploys as a **Cloudflare Worker** built with **OpenNext** (`@opennextjs/cloudflare`), driven by [.github/workflows/deploy-web.yml](.github/workflows/deploy-web.yml) on every push to `main` that touches `apps/web/**`, `packages/core/**`, `package.json`, or the workflow. Live at `https://localeguard-web.talfarage3331.workers.dev`.
+
+**Do NOT switch this to Cloudflare Pages / `next-on-pages`.** Pages forces `export const runtime = 'edge'` on every route; this app runs Node APIs (`node:crypto`, `postgres`, Hyperdrive) that break under the Edge Runtime. OpenNext → Workers is the deliberate choice. (The old `*.pages.dev` project was abandoned for this reason.)
+
+**Monorepo build order matters** — the deploy runs `pnpm cf:deploy`, which is:
+```
+pnpm --filter "@localeguard/web^..." build   # 1. build workspace deps (@localeguard/core) FIRST —
+                                             #    web does `import type { Finding }`; its .d.ts must exist
+&& opennextjs-cloudflare build               # 2. next build + bundle the OpenNext worker (.open-next/)
+&& wrangler deploy                           # 3. upload; uses opennext output + apps/web/wrangler.jsonc
+```
+Gotchas baked into the setup, don't undo them:
+- Deploy with **`wrangler deploy`**, not `opennextjs-cloudflare deploy` — the latter spins up a local Miniflare proxy that demands a local Postgres string for the Hyperdrive binding.
+- `wrangler` needs **Node ≥ 22** (the workflow pins 22); it also resolves the Hyperdrive binding on deploy, so CI sets a **throwaway** `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE` (local-emulation only; the deployed worker uses the real Hyperdrive `id`).
+
+**CI secrets** (GitHub repo → Actions): `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` — build/deploy only.
+
+**Runtime secrets** live on the Worker (`wrangler secret put`, run from `apps/web`), NOT in the repo. Already set: `AUTH_SECRET`, `GITHUB_OAUTH_ID`, `GITHUB_OAUTH_SECRET`, `GITHUB_APP_ID`, `GITHUB_APP_SLUG`, `GITHUB_PRIVATE_KEY`. Still TODO — Stripe (create in the Stripe dashboard first, then paste real values in place of the placeholders):
+```bash
+# run from apps/web/ ; each prompts for the value (never commit these)
+npx wrangler secret put STRIPE_SECRET_KEY        # sk_live_... (or sk_test_...)
+npx wrangler secret put STRIPE_PRICE_PRO         # price_...  (Pro monthly)
+npx wrangler secret put STRIPE_PRICE_PRO_YEARLY  # price_...  (Pro annual)
+npx wrangler secret put STRIPE_PRICE_TEAM_SEAT   # price_...  (Team per-seat)
+npx wrangler secret put STRIPE_WEBHOOK_SECRET    # whsec_...  (Stripe → Developers → Webhooks)
 ```
 
 ### How to VERIFY changes — Definition of Done
