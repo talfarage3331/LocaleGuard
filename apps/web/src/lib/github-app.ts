@@ -54,6 +54,23 @@ export async function getInstallationToken(installationId: string): Promise<stri
   return json.token
 }
 
+// The GitHub account (user/org) that owns an installation. Lets the callback confirm
+// the signed-in user actually owns an installation before syncing its repos — the IDOR
+// defense for GitHub's update/reconfigure redirect, which carries no signed `state`.
+export async function getInstallationAccountId(installationId: string): Promise<string | null> {
+  const res = await fetch(`${API}/app/installations/${installationId}`, {
+    headers: {
+      Authorization: `Bearer ${appJwt()}`,
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+    },
+  })
+  if (!res.ok) return null
+  const json = (await res.json()) as { account?: { id?: number | string } | null }
+  const id = json.account?.id
+  return typeof id === 'number' || typeof id === 'string' ? String(id) : null
+}
+
 // Pull every repository the installation granted, following pagination.
 export async function listInstallationRepositories(token: string): Promise<GithubRepo[]> {
   const repos: GithubRepo[] = []

@@ -1,6 +1,6 @@
 import { createVerify, generateKeyPairSync } from 'node:crypto'
-import { afterEach, expect, test } from 'vitest'
-import { appJwt } from './github-app'
+import { afterEach, expect, test, vi } from 'vitest'
+import { appJwt, getInstallationAccountId } from './github-app'
 import { handleWebhookEvent } from './github-events'
 
 const { privateKey, publicKey } = generateKeyPairSync('rsa', { modulusLength: 2048 })
@@ -8,6 +8,7 @@ const { privateKey, publicKey } = generateKeyPairSync('rsa', { modulusLength: 20
 afterEach(() => {
   delete process.env.GITHUB_APP_ID
   delete process.env.GITHUB_PRIVATE_KEY
+  vi.unstubAllGlobals()
 })
 
 test('appJwt signs a verifiable RS256 token with the app id as issuer', () => {
@@ -41,6 +42,20 @@ test('appJwt accepts a base64-encoded private key', () => {
 
 test('appJwt throws when unconfigured', () => {
   expect(() => appJwt()).toThrow(/not configured/)
+})
+
+test('getInstallationAccountId returns the account id as a string, null on error', async () => {
+  process.env.GITHUB_APP_ID = '123456'
+  process.env.GITHUB_PRIVATE_KEY = privateKey.export({ type: 'pkcs1', format: 'pem' }).toString()
+
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () => new Response(JSON.stringify({ account: { id: 777 } }), { status: 200 })),
+  )
+  expect(await getInstallationAccountId('42')).toBe('777')
+
+  vi.stubGlobal('fetch', vi.fn(async () => new Response('nope', { status: 404 })))
+  expect(await getInstallationAccountId('42')).toBeNull()
 })
 
 // A minimal chainable stub standing in for the Drizzle db: records the upsert values

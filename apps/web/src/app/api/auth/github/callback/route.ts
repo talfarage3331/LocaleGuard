@@ -1,9 +1,13 @@
-import { sql } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { type NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { db } from '@/db'
-import { repositories } from '@/db/schema'
-import { getInstallationToken, listInstallationRepositories } from '@/lib/github-app'
+import { repositories, users } from '@/db/schema'
+import {
+  getInstallationAccountId,
+  getInstallationToken,
+  listInstallationRepositories,
+} from '@/lib/github-app'
 import { INSTALL_STATE_COOKIE, verifyInstallState } from '@/lib/github-state'
 
 export const runtime = 'nodejs'
@@ -30,11 +34,24 @@ export async function GET(req: NextRequest) {
     return clearState(NextResponse.redirect(new URL('/dashboard', req.url)))
   }
 
-  // IDOR gate: only proceed if this install was initiated by *this* user (signed state
-  // round-tripped through the httpOnly cookie). Blocks syncing a forged installation_id.
+  // IDOR gate. Fast path: the signed `state` round-tripped through the httpOnly cookie
+  // proves *this* user initiated the install (fresh installs via installations/new?state=).
+  // Fallback: GitHub's update/reconfigure redirect (e.g. "Connect more", or a slow install
+  // past the 10-min cookie) carries no state — so confirm this user actually owns the
+  // installation by matching its GitHub account id to their stored GitHub identity.
   const state = req.nextUrl.searchParams.get('state')
   const cookieState = req.cookies.get(INSTALL_STATE_COOKIE)?.value
-  if (!verifyInstallState(state, cookieState, userId)) {
+  let authorized = verifyInstallState(state, cookieState, userId)
+  if (!authorized) {
+    const [user] = await db
+      .select({ githubId: users.githubId })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1)
+    const accountId = await getInstallationAccountId(installationId)
+    authorized = Boolean(user && accountId && user.githubId === accountId)
+  }
+  if (!authorized) {
     return clearState(NextResponse.redirect(new URL('/dashboard?error=invalid_state', req.url)))
   }
 
