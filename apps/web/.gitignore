@@ -1,6 +1,5 @@
 /.next/
 /next-env.d.ts
-/drizzle/
 /.open-next/
 /worker-configuration.d.ts
 /.wrangler/

@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1784405741806,
+      "tag": "0000_abnormal_aqueduct",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784447427711,
+      "tag": "0001_cold_polaris",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784448751614,
+      "tag": "0002_daily_pandemic",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1784451070292,
+      "tag": "0003_clever_alex_power",
+      "breakpoints": true
+    }
+  ]
+}
