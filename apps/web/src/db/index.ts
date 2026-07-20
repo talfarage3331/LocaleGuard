@@ -7,40 +7,35 @@ import * as schema from './schema'
 // The connection is created on first query only.
 //
 // IMPORTANT (Cloudflare Workers): a TCP socket may only be used by the request that
-// opened it, yet module scope persists across requests within an isolate. So the DB
-// client must NOT be cached at module scope in the Worker — a socket opened in the auth
-// callback and reused by the next /dashboard render throws "Connection closed"
-// ("cannot perform I/O on behalf of a different request"). We memoize per request,
-// keyed on the request's ExecutionContext; Hyperdrive pools the real connections so a
-// fresh client per request is cheap. Local `next dev` has no Cloudflare context, so we
-// fall back to DATABASE_URL and keep one persistent client on globalThis.
+// opened it, yet module scope persists across requests within an isolate. Caching the
+// client at module scope reused the auth-callback's socket on the next /dashboard render
+// and threw "Connection closed". So on the Worker we create a FRESH client per call and
+// never cache it — Hyperdrive pools the real connections, so this is cheap. (We can't
+// memoize per request either: the only per-request handle, ctx, is absent during RSC
+// page renders, and the bindings object is shared across requests.)
+// Local `next dev` has no Cloudflare context, so we fall back to DATABASE_URL and keep
+// one persistent client on globalThis (single Node process — socket reuse is legal).
 type Db = PostgresJsDatabase<typeof schema>
-const perScope = new WeakMap<object, Db>()
+const globalForDb = globalThis as unknown as { devDb?: Db }
 
-// On Cloudflare the Postgres connection comes from the Hyperdrive binding (pooled,
-// TCP handled at the edge); locally there's no binding, so fall back to DATABASE_URL.
-// `scope` is the memoization key: the per-request ctx on Workers, globalThis in dev.
-function resolveConnection(): { scope: object; connectionString: string } {
+// prepare:false is required for Supabase's transaction pooler (pgBouncer, port 6543);
+// harmless on the session pooler / direct connection.
+const connect = (connectionString: string): Db =>
+  drizzle(postgres(connectionString, { prepare: false }), { schema })
+
+function getDb(): Db {
+  // On Cloudflare the connection comes from the Hyperdrive binding (pooled, TCP at the
+  // edge). ponytail: one client per call, not per request — a few extra Hyperdrive
+  // connections per page load; pool them via ctx if that ever shows up as pressure.
   try {
-    const { env, ctx } = getCloudflareContext()
-    const hyperdrive = (env as { HYPERDRIVE?: { connectionString: string } }).HYPERDRIVE
-    if (hyperdrive?.connectionString) return { scope: ctx, connectionString: hyperdrive.connectionString }
+    const hyperdrive = (getCloudflareContext().env as { HYPERDRIVE?: { connectionString: string } })
+      .HYPERDRIVE
+    if (hyperdrive?.connectionString) return connect(hyperdrive.connectionString)
   } catch {
     // Not in a Cloudflare request context (e.g. `next dev` without a bound Hyperdrive).
   }
   if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is not set')
-  return { scope: globalThis, connectionString: process.env.DATABASE_URL }
-}
-
-function getDb(): Db {
-  const { scope, connectionString } = resolveConnection()
-  const cached = perScope.get(scope)
-  if (cached) return cached
-  // prepare:false is required for Supabase's transaction pooler (pgBouncer, port 6543);
-  // harmless on the session pooler / direct connection.
-  const db = drizzle(postgres(connectionString, { prepare: false }), { schema })
-  perScope.set(scope, db)
-  return db
+  return (globalForDb.devDb ??= connect(process.env.DATABASE_URL))
 }
 
 export const db = new Proxy({} as Db, {
