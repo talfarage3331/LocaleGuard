@@ -5,6 +5,13 @@ import { createSign } from 'node:crypto'
 // repositories an installation granted. Uses node:crypto — no extra JWT dependency.
 
 const API = 'https://api.github.com'
+// GitHub's REST API 403s any request without a User-Agent. Workers' fetch sends none
+// by default (Node quietly adds one), so set it explicitly on every call.
+const COMMON_HEADERS = {
+  Accept: 'application/vnd.github+json',
+  'X-GitHub-Api-Version': '2022-11-28',
+  'User-Agent': 'LocaleGuard',
+}
 
 export interface GithubRepo {
   githubRepoId: string
@@ -41,11 +48,7 @@ export function appJwt(): string {
 export async function getInstallationToken(installationId: string): Promise<string> {
   const res = await fetch(`${API}/app/installations/${installationId}/access_tokens`, {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${appJwt()}`,
-      Accept: 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-    },
+    headers: { Authorization: `Bearer ${appJwt()}`, ...COMMON_HEADERS },
   })
   if (!res.ok) {
     throw new Error(`Installation token exchange failed: ${res.status} ${await res.text()}`)
@@ -59,11 +62,7 @@ export async function getInstallationToken(installationId: string): Promise<stri
 // defense for GitHub's update/reconfigure redirect, which carries no signed `state`.
 export async function getInstallationAccountId(installationId: string): Promise<string | null> {
   const res = await fetch(`${API}/app/installations/${installationId}`, {
-    headers: {
-      Authorization: `Bearer ${appJwt()}`,
-      Accept: 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-    },
+    headers: { Authorization: `Bearer ${appJwt()}`, ...COMMON_HEADERS },
   })
   if (!res.ok) return null
   const json = (await res.json()) as { account?: { id?: number | string } | null }
@@ -76,11 +75,7 @@ export async function listInstallationRepositories(token: string): Promise<Githu
   const repos: GithubRepo[] = []
   for (let page = 1; ; page++) {
     const res = await fetch(`${API}/installation/repositories?per_page=100&page=${page}`, {
-      headers: {
-        Authorization: `token ${token}`,
-        Accept: 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-      },
+      headers: { Authorization: `token ${token}`, ...COMMON_HEADERS },
     })
     if (!res.ok) {
       throw new Error(`Listing installation repositories failed: ${res.status} ${await res.text()}`)
