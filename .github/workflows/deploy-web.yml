@@ -5,11 +5,14 @@ name: Deploy web (Cloudflare Workers)
 # Replaces the Cloudflare Pages/next-on-pages build, which can't run this app
 # (it forces edge runtime; the app uses node:crypto + postgres + Hyperdrive).
 #
-# Requires two repo secrets:
+# Requires these repo secrets:
 #   CLOUDFLARE_API_TOKEN  — token with "Edit Cloudflare Workers" permission
 #   CLOUDFLARE_ACCOUNT_ID — 0bc8a25e796ce9a0b3f639d154d4989b
-# Runtime secrets (AUTH_SECRET, GITHUB_OAUTH_*, STRIPE_*, DATABASE_URL) are set
-# on the Worker separately (dashboard or `wrangler secret put`), not here.
+#   DATABASE_URL          — direct Supabase connection (port 5432, NOT the txn
+#                           pooler) used only to apply Drizzle migrations here.
+# Other runtime secrets (AUTH_SECRET, GITHUB_OAUTH_*, STRIPE_*) are set on the
+# Worker separately (dashboard or `wrangler secret put`), not here. The Worker
+# itself reaches Postgres via the Hyperdrive binding, not DATABASE_URL.
 on:
   push:
     branches: [main]
@@ -39,6 +42,14 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
+
+      # Apply pending Drizzle migrations BEFORE deploying, so the schema the new
+      # code expects exists before that code serves traffic. Migrations are
+      # additive, so old code tolerates the new columns during the brief overlap.
+      - name: Apply database migrations
+        run: pnpm --filter @localeguard/web db:migrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Build and deploy (OpenNext → Workers)
         run: pnpm cf:deploy
